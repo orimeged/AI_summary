@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart';
 import 'home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -8,32 +10,51 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final CollectionReference _usersCollection =
+      FirebaseFirestore.instance.collection('users'); // Firestore collection
   bool _isLoading = false;
   bool _isPasswordVisible = false;
 
   Future<void> _handleLogin() async {
     setState(() => _isLoading = true);
-    
-    // בדיקת הרשאות
-    bool isAdmin = _passwordController.text == "admin";
-    
-    User user = User(
-      name: _nameController.text,
-      isAdmin: isAdmin,
-    );
-    
-    await Future.delayed(Duration(seconds: 2)); // Simulate network request
-    
-    setState(() => _isLoading = false);
-    
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomeScreen(user: user),
-      ),
+
+    try {
+      // בדיקת אם המשתמש כבר קיים
+      final userDoc = await _usersCollection.doc(_nameController.text).get();
+      if (userDoc.exists) {
+        final data = userDoc.data() as Map<String, dynamic>;
+        bool isAdmin = _passwordController.text == "admin";
+        if (data['password'] == _passwordController.text) {
+          // מעבר למסך הראשי
+          User user = User(
+            name: _nameController.text,
+            isAdmin: isAdmin,
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(user: user),
+            ),
+          );
+        } else {
+          _showError("סיסמה שגויה!");
+        }
+      } else {
+        _showError("משתמש לא נמצא!");
+      }
+    } catch (e) {
+      print("שגיאה בהתחברות: $e");
+      _showError("שגיאה בהתחברות.");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -60,13 +81,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.school,
+                      Icons.person,
                       size: 80,
                       color: Colors.white,
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'סיכום שיעור חכם',
+                      'מסך התחברות',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -74,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     SizedBox(height: 40),
-                    
+
                     Card(
                       elevation: 8,
                       shape: RoundedRectangleBorder(
@@ -87,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextField(
                               controller: _nameController,
                               decoration: InputDecoration(
-                                labelText: 'שם',
+                                labelText: 'שם משתמש',
                                 prefixIcon: Icon(Icons.person),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -95,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             SizedBox(height: 16),
-                            
                             TextField(
                               controller: _passwordController,
                               decoration: InputDecoration(
@@ -103,9 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 prefixIcon: Icon(Icons.lock),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _isPasswordVisible 
-                                      ? Icons.visibility_off 
-                                      : Icons.visibility,
+                                    _isPasswordVisible
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -120,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               obscureText: !_isPasswordVisible,
                             ),
                             SizedBox(height: 24),
-                            
+
                             SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -143,11 +163,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    
                     SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
-                        // Add registration navigation
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterScreen()),
+                        );
                       },
                       child: Text(
                         'אין לך חשבון? הירשם כאן',
@@ -166,4 +188,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-} 
+}

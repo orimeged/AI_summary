@@ -18,8 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     
     // בדיקת הרשאות
-    bool isAdmin = _emailController.text.toLowerCase() == "admin" && 
-                   _passwordController.text == "admin";
+    bool isAdmin = _passwordController.text == "admin";
     
     User user = User(
       name: _nameController.text,

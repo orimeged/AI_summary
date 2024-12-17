@@ -10,8 +10,6 @@ void main() {
   Gemini.init(apiKey: "AIzaSyC4wMrwsH_C1ayQSH63CzBfvfgKOCy7bAE");
   runApp(MyApp());
 }
-  Gemini.init(apiKey: "AIzaSyC4wMrwsH_C1ayQSH63CzBfvfgKOCy7bAE");
-  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

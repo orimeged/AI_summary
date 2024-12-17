@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'screens/login_screen.dart';
 
 void main() {
+  Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // לוודא אתחול תקין של ה-Widgets
+  await Firebase.initializeApp(); 
+  Gemini.init(apiKey: "AIzaSyC4wMrwsH_C1ayQSH63CzBfvfgKOCy7bAE");
+  runApp(MyApp());
+}
   Gemini.init(apiKey: "AIzaSyC4wMrwsH_C1ayQSH63CzBfvfgKOCy7bAE");
   runApp(MyApp());
 }

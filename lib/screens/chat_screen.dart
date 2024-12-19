@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'globals.dart' as globals;
 
-
 class ChatScreen extends StatefulWidget {
   final String username;
-  ChatScreen({required this.username});
+  final String recordingType;
+
+  ChatScreen({required this.username, required this.recordingType});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -36,7 +37,9 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final response = await Gemini.instance.prompt(
         parts: [
-          Part.text("תוכן השיעור:\n$_summary\n\nענה בעברית על השאלה הבאה:\n$question"),
+          Part.text(
+            "תוכן ההקלטה (${widget.recordingType}):\n$_summary\n\nענה בעברית על השאלה הבאה:\n$question",
+          ),
         ],
       );
 
@@ -58,6 +61,40 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     _questionController.clear();
+  }
+
+  Future<void> _sendSummary() async {
+    if (_summary.trim().isEmpty) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await Gemini.instance.prompt(
+        parts: [
+          Part.text(
+            "שלח את הסיכום עבור ההקלטה (${widget.recordingType}):\n$_summary",
+          ),
+        ],
+      );
+
+      setState(() {
+        _messages.add(ChatMessage(
+          text: response?.output ?? 'לא התקבלה תשובה',
+          isUser: false,
+        ));
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: "שגיאה בשליחת הסיכום",
+          isUser: false,
+        ));
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -118,6 +155,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   icon: Icon(Icons.send),
                   onPressed: () => _sendMessage(_questionController.text),
                 ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _sendSummary,
+                  child: Text('שלח סיכום'),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -161,4 +208,4 @@ class ChatBubble extends StatelessWidget {
       ),
     );
   }
-} 
+}

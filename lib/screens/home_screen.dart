@@ -26,43 +26,43 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initializeScreens() {
-    if (widget.user.isAdmin) {
-      _screens = [
-        RecordingScreen(),
-        ChatScreen(username: widget.user.name),
-        HistoryScreen(),
-      ];
-      _navItems = [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.mic),
-          label: 'הקלטה',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat),
-          label: 'צ׳אט',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'היסטוריה',
-        ),
-      ];
-    } else {
-      _screens = [
-        ChatScreen(username: widget.user.name),
-        HistoryScreen(),
-      ];
-      _navItems = [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat),
-          label: 'צ׳אט',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'היסטוריה',
-        ),
-      ];
-    }
+  if (widget.user.isAdmin) {
+    _screens = [
+      RecordingScreen(),
+      ChatScreen(username: widget.user.name, recordingType: "שיעור"), // Provide a default recordingType
+      HistoryScreen(),
+    ];
+    _navItems = [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.mic),
+        label: 'הקלטה',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.chat),
+        label: 'צ׳אט',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.history),
+        label: 'היסטוריה',
+      ),
+    ];
+  } else {
+    _screens = [
+      ChatScreen(username: widget.user.name, recordingType: "שיעור"), // Provide a default recordingType
+      HistoryScreen(),
+    ];
+    _navItems = [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.chat),
+        label: 'צ׳אט',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.history),
+        label: 'היסטוריה',
+      ),
+    ];
   }
+}
 
   @override
   Widget build(BuildContext context) {
